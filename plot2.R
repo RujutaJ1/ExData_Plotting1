@@ -1,20 +1,26 @@
+## Start the programme by cleaning up the variables and setting up the right directory
+
 getwd()
-setwd("F:/Rujuta/Dataexploration")
-#read the complete file
-full_data <- read.table("household_power_consumption.txt", sep=";", header=TRUE)
-#changing the format of the date 
-datefromdata <- as.Date(full_data$Date, format="%d/%m/%Y")
+ls()
+rm(list=ls())
+setwd("F:/Rujuta/DataExploration")
+# Data Download, unzip file
+fileurl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+download.file(fileurl, destfile="./Assignment1/Data.zip")
+unzip("./Assignment1/Data.zip")
+# for doing the assignment in the most efficient way, i would be using the following r packages
+# lubridate for date and time, readr for reading data, dplyr for data manipulation
+library(dplyr)
+library(readr)
+HHData6 <- read.table("household_power_consumption.txt", header=TRUE, sep=";")
+library(lubridate)
+HHData7 <- mutate(HHData6, datetime= paste(Date,Time,sep=" "))
+HHData7$Date <- as.Date(HHData7$Date, format="%d/%m/%Y")
+HHData8 <- filter(HHData7, (Date=="2007-02-02") | (Date=="2007-02-01"))
+HHData8$Time <- strptime(HHData8$Time, format="%H:%M:%S")
+HHData8$datetime <- strptime(HHData8$datetime, format="%d/%m/%Y %H:%M:%S")
+HHData9 <- HHData8
+HHData9$Global_active_power <- as.numeric(as.character(HHData9$Global_active_power))
 
-datefromdata -> full_data$Date
-
-#combining the date and time
-datetimedraft1 <- paste(full_data$Date, full_data$Time)
-
-datetime <- as.POSIXct(datetimedraft1, format="%Y-%m-%d %H:%M:%S")
-
-# subset of the data, for the 2 date
-subsetdata1 <- subset(full_data, subset=((full_data$Date=="2007-02-01")|(full_data$Date=="2007-02-02")))
-#changing the type of Global active power to numeric
-
-Global_Active_Power <- as.numeric(subsetdata1$Global_active_power)
-plot(Global_Active_Power~ subsetdata1$Time, type="l")
+#for Chart2
+plot(HHData9$datetime,HHData9$Global_active_power,type="l", ylab="Global active power(in Kilowatts)", xlab="")
